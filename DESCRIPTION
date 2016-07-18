@@ -1,0 +1,21 @@
+Package: precondls
+Type: Package
+Title: Preconditioned (penalized) least-squares regression
+Version: 0.1
+Date: 2016-07-11
+Authors@R: as.person(c(
+  'Daniel J. McDonald <dajmcdon@indiana.edu> [aut,cre]',
+  'Darren Homrighausen <dhomrigh@gmail.com> [aut]'
+  ))
+Description: This package implements the simulations and data analysis examples
+    for preconditioned least-squares regression as in (Homrighausen and McDonald,
+    2016). Essentially, the design matrix is premultiplied by a sparse matrix,
+    reducing the number of available observations from n to q. However, the addition
+    of a ridge penalty results in estimates of the true coefficient vector with
+    lower mean-squared error, even relative to ridge regression (in some cases). The
+    result is improved computation and better statistical accuracy.
+License: GPL
+LazyData: TRUE
+RoxygenNote: 5.0.1
+Suggests: mseq,
+    BatchExperiments
