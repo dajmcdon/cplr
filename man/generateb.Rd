@@ -45,4 +45,3 @@ generateb(10, 'expdecay', b1=.9)
 generateb(10, 'expdecay', b1=1) # same as 'constant'
 generateb(10, 'constant')
 }
-

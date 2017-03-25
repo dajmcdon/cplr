@@ -24,4 +24,3 @@ The generalized cross validation score.
 This function is designed to be optimized over using already computed
 information. It is not intended to stand alone.
 }
-

@@ -28,4 +28,3 @@ If \code{XstuffTrain} is given, the linear smoother gives the
  \eqn{\E[\hat{Y}]}. Otherwise (NULL), evaluate the predictions on the
  test data to get monte carlo bias
 }
-

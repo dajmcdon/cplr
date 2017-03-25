@@ -24,4 +24,3 @@ generateCov(10,'diag')
 generateCov(10, 'corrDecay')
 generateCov(10, 'corrDecay',.9)
 }
-

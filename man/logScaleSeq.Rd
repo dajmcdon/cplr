@@ -25,4 +25,3 @@ Create a sequence of numbers equally spaced on the log scale
 logScaleSeq(1,1000,20)
 logScaleSeq(1,1000,20, FALSE)
 }
-

@@ -26,4 +26,3 @@ Generates the design matrix
 \examples{
 generateX(100, diag(1,10), 'rsparseBern')
 }
-

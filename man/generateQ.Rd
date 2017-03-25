@@ -21,6 +21,7 @@ with \code{s=3}, see \code{\link{rsparseBern}}}
 }
 \value{
 A qxn matrix of random numbers
+#@export
 }
 \description{
 Generate a preconditioner
@@ -28,4 +29,3 @@ Generate a preconditioner
 \examples{
 generateQ(5, 10)
 }
-

@@ -31,6 +31,7 @@ compression ('qxy')}
 a list with components \code{bhat} (the
  coefficient vector), \code{hatmat} (the smoothing
  matrix), and \code{df} (the degrees of freedom, trace of \code{hatmat}).
+#@export
 }
 \description{
 This is the main function in this package. It computes different forms of compressed least squares regression.
@@ -54,8 +55,7 @@ augmentation version), or \code{'zero'} (no regularization).
 n = 100
 p = 5
 q = 50
-X = generateX(100, diag(1,10), 'rnorm')
-Y = generateY(100, 10:1, 'rnorm')
+X = generateX(n, diag(1,p), 'rnorm')
+Y = generateY(X, p:1, 'rnorm')
 bhat = plsBasic(X, Y, 'qxqy', q=q, regTerm='Ident', lam=1)
 }
-

@@ -2,7 +2,8 @@
 % Please edit documentation in R/algorithms.R
 \name{ridgeEstimAlgoLam}
 \alias{ridgeEstimAlgoLam}
-\title{Calculates estimation error for ridge regression (optimal fixed lambda)}
+\title{Calculates estimation error for ridge regression (GCV-minimizing
+ lambda)}
 \usage{
 ridgeEstimAlgoLam(job, static, dynamic, ...)
 }
@@ -16,7 +17,7 @@ ridgeEstimAlgoLam(job, static, dynamic, ...)
 \item{...}{see \code{\link{BatchExperiments}}}
 }
 \value{
-A list with components \code{estimRisk} and \code{ptm}. The first gives the estimation risk of the particular method while the second calculates how long the solution took to compute.
+A list with components \code{estimRisk}, \code{predRisk}, \code{baseline}, and \code{ptm}. The first gives the estimation risk of the particular method, the second is the MSE on the test set, the third is the MSE of the true coefficients, while the last calculates how long the solution took to compute.
 }
 \description{
 This function is used by \code{\link{BatchExperiments}} to run the simulations.
@@ -25,4 +26,3 @@ See that package for documentation.
 \seealso{
 empEstimRisk
 }
-

@@ -18,4 +18,3 @@ The average squared estimation error
 \description{
 Calculate the MSE
 }
-

@@ -28,13 +28,13 @@ logScaleSeq <- function(from=1, to=1, len=1, integers = TRUE){
 #'
 #' @return A list containing th vector of coefficients at the GCV minimizing value of lambda (\code{bhat}) and the best value of lambda (\code{lamStar}).
 #' @export
-ridgeRegression <- function(X, Y, lamLimits = c(0, min(dim(X)))){
-  p = dim(X)[2]
-  n = dim(X)[1]
+ridgeRegression <- function(X, Y, lam.upper = min(dim(X))){
+  p = ncol(X)
+  n = nrow(X)
   XX = crossprod(X) / n
   XY = crossprod(X, Y) / n
 
-  lamStar = optimize(GCVridge, interval=lamLimits, XX=XX, XY=XY, X=X, Y=Y)$minimum
+  lamStar = optimize(GCVridge, interval=c(0,lam.upper), XX=XX, XY=XY, X=X, Y=Y)$minimum
   bhat = solve(XX + lamStar*diag(p), XY)
 
   return(list(bhat=bhat, lamStar = lamStar))
@@ -75,7 +75,7 @@ GCVridge <- function(lam, XX, XY, X, Y){
   p = ncol(X)
   n = nrow(X)
   hmat = X %*% solve(XX + lam* diag(p))
-  num = mean((Y-hmat %*% XY)^2)
-  denom = mean(1-rowSums(hmat*X/n))^2
+  num = sum((Y-hmat %*% XY)^2)
+  denom = sum(1-rowSums(hmat*X)/n)^2
   return(num/denom)
 }

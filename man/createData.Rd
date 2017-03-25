@@ -34,4 +34,3 @@ Generates data as in the paper
 \examples{
 createData(2500, 2, 250, 'corrUniform', .8, 'constant', NA, 2500-250-1)
 }
-

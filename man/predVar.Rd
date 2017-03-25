@@ -28,4 +28,3 @@ If \code{XstuffTrain} is given, the linear smoother gives the
  idempotent). Otherwise (NULL), evaluate the predictions on the
  test data to get monte carlo variance
 }
-

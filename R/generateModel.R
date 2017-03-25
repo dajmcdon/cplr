@@ -69,6 +69,7 @@ generateb <- function(p, method = 'randN', b1 = NULL, s = 10, spar = 10,...) {
              constNorm = rep_len(1 / sqrt(p), p) * spar,
              constLinDecay = (p:1) / sqrt(sum((1:p)^2)) * spar,
              constant = rep(1, p),
+             ones = rep(c(1,-1), times=ceiling(p/2))[1:p],
              stop('Invalid b type')
   )
   return(b)

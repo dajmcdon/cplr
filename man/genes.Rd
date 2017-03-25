@@ -2,12 +2,12 @@
 % Please edit documentation in R/data.R
 \docType{data}
 \name{genes}
+\alias{genes}
 \alias{b1}
 \alias{b2}
 \alias{b3}
 \alias{g1}
 \alias{g2}
-\alias{genes}
 \alias{w1}
 \alias{w2}
 \alias{w3}
@@ -45,4 +45,3 @@ w3
 Eight different genetics datasets \code{b1, b2, b3, g1, g2, w1, w2, w3} are used in this paper
 }
 \keyword{datasets}
-

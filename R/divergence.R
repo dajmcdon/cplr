@@ -1,13 +1,8 @@
-###h function stuff
-HmatF = function(X,QtQ,lam){
-  p = ncol(X)
-  return(X %*% solve( t(X)%*%t(Q)%*%Q%*%X + lam*diag(p)) %*% t(X))
-}
-hF = function(Y,X,QtQ,H){
-  h_1 = t(Y) %*% H %*% Y
-  h_2 = t(Y) %*% QtQ %*% H %*% Y
-  partial_h_1.partial_yi = 2 * H %*% Y
-  partial_h_2.partial_yi = 2 * QtQ %*% H %*% Y
+hF = function(Y,X,QtQ,W){
+  h_1 = t(Y) %*% W %*% Y
+  h_2 = t(Y) %*% QtQ %*% W %*% Y
+  partial_h_1.partial_yi = 2 * W %*% Y
+  partial_h_2.partial_yi = (QtQ %*% W + W %*% QtQ) %*% Y
   return(list('h'         = c(h_1,h_2),
               'partial_h' = cbind(partial_h_1.partial_yi,partial_h_2.partial_yi)))
   # partial h_j/partial y_i = partial_h[i,j],  j = 1,2
@@ -19,74 +14,59 @@ hF = function(Y,X,QtQ,H){
 ###       | c d |                   |-c  a |
 innerProdForGfuncF = function(b_1,XtX,b_2=NULL){
   if(is.null(b_2)) b_2 = b_1
-  return(t(b_1) %*% XtX %*% b_2)
+  return(drop(t(b_1) %*% XtX %*% b_2))
 }
 determinant_yF = function(a,b,c,d){
   return(a*d - b*c)
 }
 
-gOnlyF = function(b_PP,b_FP,X){
+gOnlyF = function(b_PC,b_FC,X){
   XtX = t(X) %*% X
-  a = innerProdForGfuncF(b_PP,XtX)
-  b = innerProdForGfuncF(b_PP,XtX,b_FP)
+  a = innerProdForGfuncF(b_PC,XtX)
+  b = innerProdForGfuncF(b_PC,XtX,b_FC)
   c = b
-  d = innerProdForGfuncF(b_FP,XtX)
+  d = innerProdForGfuncF(b_FC,XtX)
   det_y = determinant_yF(a,b,c,d)
   if(abs(det_y) < 1e-16) cat('zero determinant \n')
   g = matrix(c(d,-b,-c,a)/det_y,nrow=2,ncol=2,byrow=TRUE)
   return(list('g'=g,'a'=a,'b'=b,'c'=c,'d'=d,'det_y'=det_y))
 }
 
-gDerivativeF = function(b_PP,b_FP,X,H,QtQ,i,g,a,b,c,d,det_y){
+gDerivativeF = function(Y,X,W,QtQ,a,b,c,d,det_y){
+  n = length(Y)
   ##### Derivatives:
-  H_i    = H[,i]
-  HQtQ   = H %*% QtQ
-  HQtQ_i = HQtQ[,i]
-  partial_a.partial_yi = 2* t(H_i) %*% H %*% Y
-  partial_b.partial_yi = 2 * t(H_i) %*% HQtQ %*% Y
-  partial_c.partial_yi = 2 * t(HQtQ_i) %*% H %*% Y
-  partial_d.partial_yi = 2 * t(HQtQ_i) %*% HQtQ %*% Y
-  partial_det_y.partial_yi = partial_a.partial_yi * d +
-    a * partial_d.partial_yi -
-    partial_b.partial_yi * c -
-    b * partial_c.partial_yi
+  Wsq    = W %*% W
+  WsqQtQ = Wsq %*% QtQ
+  QtQWsq = QtQ %*% Wsq
+  Grad_a = 2* Wsq %*% Y
+  Grad_b = (QtQWsq + t(QtQWsq)) %*% Y
+  Grad_c = Grad_b
+  Grad_d = 2* QtQWsq %*% QtQ %*% Y
+  Grad_det_y = Grad_a * d + a * Grad_d - Grad_b * c - b * Grad_c
   #To get each component function:
   #Example for g_11:
   # partial g_11 partial y_i = partial [d(y)/det(y)] partial y_i
   # = partial (d(y) det(y) - d(y) partial det(y))/det(y)**2
-  partial_g_11.partial_yi = (partial_d.partial_yi * det_y - d * partial_det_y.partial_yi)/det_y**2
-  partial_g_12.partial_yi = -(partial_b.partial_yi * det_y - b * partial_det_y.partial_yi)/det_y**2
-  partial_g_21.partial_yi = -(partial_c.partial_yi * det_y - c * partial_det_y.partial_yi)/det_y**2
-  partial_g_22.partial_yi = -(partial_a.partial_yi * det_y - a * partial_det_y.partial_yi)/det_y**2
-  partial_g.partial_yi = matrix(c(partial_g_11.partial_yi,partial_g_12.partial_yi,
-                                  partial_g_21.partial_yi,partial_g_22.partial_yi),
-                                nrow=2,byrow=TRUE)
-  return(list('partial_g' = partial_g.partial_yi))
-}
-###f function stuff
-###
-### f = [Y,QtQ Y] \Rightarrow \partial f \partial y_i = [e_i,t(Q) %*% Q[,i]]
-###   where e_i is i^{th} canonical basis vector
-fF = function(Y,QtQ,i){
-  e_i = rep(0,length(Y));e_i[i] = 1
-  f_1 = Y
-  f_2 = QtQ %*% Y
-  partial_f_1.partial_yi = e_i
-  partial_f_2.partial_yi = QtQ[,i]
-  return(list('f' = cbind(f_1,f_2),
-              'partial_f' = cbind(partial_f_1.partial_yi,partial_f_2.partial_yi)))
-  # partial f_j/partial y_i = partial_f[i,j],  j = 1,2
+  partial_g = array(0,dim=c(2,2,n))
+  partial_g[1,1,] = Grad_d * det_y - d * Grad_det_y
+  partial_g[2,2,] = Grad_a * det_y - a * Grad_det_y
+  partial_g[1,2,] = - Grad_b * det_y + b * Grad_det_y
+  partial_g[2,1,] = - Grad_c * det_y + c * Grad_det_y
+  partial_g = partial_g/det_y**2
+  return(partial_g)
 }
 
 
-#' Derivative of F
+
+#' Divergence calculation for degrees of freedom
 #'
 #' For approximating the degrees of freedom of the convex combination of full
 #' and partial compression.
 #'
 #' @param X the \eqn{n \times p} design matrix
 #' @param Y the response vector
-#' @param QtQ the crossproduct of the compression matris
+#' @param Q the compression matris
+#' @param W for faster computation, \eqn{W = X (X'Q'QX + lam I)^{-1} X'}
 #' @param b_PC the coefficient vector estimated via partial compression
 #' @param b_FC the coefficient vector estimated via full compression
 #' @param lam the tuning parameter
@@ -103,43 +83,39 @@ fF = function(Y,QtQ,i){
 #' \deqn{\partial F_i(y) / \partial y_i = W[i,] (df gh + f(dg h + g dh))}
 #'
 #' @export
-divergenceF = function(X,Y,QtQ,b_PP,b_FP,lam){
+divergenceF = function(X,Y,Q,W,b_PC,b_FC,lam){
   n      = nrow(X);p = ncol(X)
-  W      = X %*% solve( t(X) %*% QtQ %*% X + diag(lam,p) ) %*% t(X)
   QtQ    = t(Q) %*% Q
-  H      = HmatF(X,QtQ,lam)
   ## Compute partial Omega/partial y_i= partial Omega_1/partial y_i + partial Omega_2/partial y_i
-  hStuff               = hF(Y,X,QtQ,H)
+  hStuff               = hF(Y,X,QtQ,W)
   h                    = hStuff$h
   partial_h.partial.yi = hStuff$partial_h
-  gOnlyStuff           = gOnlyF(b_PP,b_FP,X)
-  g = gOnlyStuff$g;a = gOnlyStuff$a;b = gOnlyStuff$b;d = gOnlyStuff$d;det_y = gOnlyStuff$det_y
+  gOnlyStuff           = gOnlyF(b_PC,b_FC,X)
+  g = gOnlyStuff$g;  a = gOnlyStuff$a;b = gOnlyStuff$b;d = gOnlyStuff$d;det_y = gOnlyStuff$det_y
   c = b#symmetric matrix
-  Omega_1 = matrix(0,nrow=n,ncol=1)
-  Omega_2 = matrix(0,nrow=n,ncol=1)
-  partial_F.partial.y = rep(0,n)
-  for(i in 1:n){
-    fStuff = fF(Y,QtQ,i)
-    gDerivativeStuff     = gDerivativeF(b_PP,b_FP,X,H,QtQ,i,g,a,b,c,d,det_y)
-    f                    = fStuff$f
-    partial_f.partial.yi = fStuff$partial_f
-    partial_g.partial.yi = gDerivativeStuff$partial_g
-    for(k in 1:n){
-      Delta_k1 = f[k,1]*g[1,1] + f[k,2]*g[2,1]
-      Delta_k2 = f[k,1]*g[1,2] + f[k,2]*g[2,2]
-      Omega_k1 = partial_h.partial.yi[i,1]*Delta_k1 +
-        h[1]*(partial_f.partial.yi[k,1]*g[1,1] + f[k,1]*partial_g.partial.yi[1,1] +
-                partial_f.partial.yi[k,2]*g[2,1] + f[k,2]*partial_g.partial.yi[2,1])
-      Omega_k2 = partial_h.partial.yi[i,2]*Delta_k2 +
-        h[2]*(partial_f.partial.yi[k,1]*g[1,2] + f[k,1]*partial_g.partial.yi[1,2] +
-                partial_f.partial.yi[k,2]*g[2,2] + f[k,2]*partial_g.partial.yi[2,2])
-      Omega_1[k] = Omega_k1
-      Omega_2[k] = Omega_k2
-    }
-    Omega = Omega_1 + Omega_2
-    partial_Fi.partial.yi  = W[i,] %*% Omega
-    partial_F.partial.y[i] = partial_Fi.partial.yi
-  }
+  #OmegaBar_1 = matrix(0,nrow=n,ncol=n)
+  #OmegaBar_2 = matrix(0,nrow=n,ncol=n)
+  #f function stuff
+  f_1 = Y
+  f_2 = QtQ %*% Y
+  f   = cbind(f_1,f_2)
+  #Delta stuff
+  Delta_1 = f[,1]*g[1,1] + f[,2]*g[2,1]
+  Delta_2 = f[,1]*g[1,2] + f[,2]*g[2,2]
+  #g function stuff
+  partial_g = gDerivativeF(Y,X,W,QtQ,a,b,c,d,det_y)
+  OmegaBar_1 = outer(partial_h.partial.yi[,1],Delta_1) +
+    h[1]*(diag(g[1,1],n) +
+            outer(f[,1],partial_g[1,1,]) +
+            outer(f[,2],partial_g[2,1,]) +
+            QtQ*g[2,1])
+  OmegaBar_2 = outer(partial_h.partial.yi[,2],Delta_2) +
+    h[2]*(diag(g[1,2],n) +
+            outer(f[,1],partial_g[1,2,]) +
+            outer(f[,2],partial_g[2,2,]) +
+            QtQ*g[2,2])
+  OmegaBar   = OmegaBar_1 + OmegaBar_2
+  partial_F.partial.y = rowSums(W * t(OmegaBar))
   return(list(divergence = sum(partial_F.partial.y),
               partial_F.partial.y = partial_F.partial.y))
 }

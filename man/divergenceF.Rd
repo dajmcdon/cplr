@@ -2,22 +2,24 @@
 % Please edit documentation in R/divergence.R
 \name{divergenceF}
 \alias{divergenceF}
-\title{Derivative of F}
+\title{Divergence calculation for degrees of freedom}
 \usage{
-divergenceF(X, Y, QtQ, b_PP, b_FP, lam)
+divergenceF(X, Y, Q, W, b_PC, b_FC, lam)
 }
 \arguments{
 \item{X}{the \eqn{n \times p} design matrix}
 
 \item{Y}{the response vector}
 
-\item{QtQ}{the crossproduct of the compression matris}
+\item{Q}{the compression matris}
 
-\item{lam}{the tuning parameter}
+\item{W}{for faster computation, \eqn{W = X (X'Q'QX + lam I)^{-1} X'}}
 
 \item{b_PC}{the coefficient vector estimated via partial compression}
 
 \item{b_FC}{the coefficient vector estimated via full compression}
+
+\item{lam}{the tuning parameter}
 }
 \value{
 A list with two components: \code{divergence} gives the estimated
@@ -34,4 +36,3 @@ and partial compression.
 \deqn{\Rightarrow F_i(y) = W[i,] f(y) g(y) h(y)}
 \deqn{\partial F_i(y) / \partial y_i = W[i,] (df gh + f(dg h + g dh))}
 }
-

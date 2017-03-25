@@ -4,7 +4,7 @@
 \alias{ridgeRegression}
 \title{No intercept ridge regression, optimal lambda}
 \usage{
-ridgeRegression(X, Y, lamLimits = c(0, min(dim(X))))
+ridgeRegression(X, Y, lam.upper = min(dim(X)))
 }
 \arguments{
 \item{X}{design matrix}
@@ -20,4 +20,3 @@ A list containing th vector of coefficients at the GCV minimizing value of lambd
 Computes the ridge regression estimate, optimizing over the tuning parameter
 lambda using generalized cross validation (GCV)
 }
-

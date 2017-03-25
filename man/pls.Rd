@@ -47,6 +47,7 @@ A list with components:
     alternative degrees-of-freedom approximation. If requested,
     (\code{divergencedf==TRUE}), this estimate is also returned.}
 }
+#@export
 }
 \description{
 This function generalized \code{\link{plsBasic}} by combining full and partial
@@ -67,11 +68,10 @@ The second method, 'convexComb', is similar, though it first finds the fully and
 n = 100
 p = 5
 q = 50
-X = generateX(100, diag(1,10), 'rnorm')
-Y = generateY(100, 10:1, 'rnorm')
+X = generateX(n, diag(1,p), 'rnorm')
+Y = generateY(X, p:1, 'rnorm')
 bhat = pls(X, Y, 'linComb', q=q, regTerm='Ident', lam=1)
 }
 \seealso{
 plsBasic
 }
-

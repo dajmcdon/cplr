@@ -15,4 +15,3 @@ an n-vector of independent Laplace random variates
 \description{
 Generates standard Lapace random variates
 }
-

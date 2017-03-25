@@ -20,4 +20,3 @@ The average squared prediction error
 \description{
 Calculate the MSPE on new data
 }
-

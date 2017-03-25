@@ -10,7 +10,7 @@
 #' @param ... optional additional arguments passed to the random number generator
 #'
 #' @return A qxn matrix of random numbers
-#' @export
+#' #@export
 #'
 #' @examples
 #' generateQ(5, 10)
@@ -29,7 +29,7 @@ generateQ <- function(q, n, rand='rsparseBern', normalize = sqrt(q/3),...){
 #' @param s calibrates the probability of non-zeros. Default value is 3. Should be greater than one or results in unexpected behavior.
 #'
 #' @return Vector of random sparse Bernoulli draws
-#' @export
+#' #@export
 #'
 #' @examples
 #' rsparseBern(10)
@@ -72,14 +72,14 @@ rsparseBern <- function(n, s=3){
 #' @return a list with components \code{bhat} (the
 #'  coefficient vector), \code{hatmat} (the smoothing
 #'  matrix), and \code{df} (the degrees of freedom, trace of \code{hatmat}).
-#' @export
+#' #@export
 #'
 #' @examples
 #' n = 100
 #' p = 5
 #' q = 50
-#' X = generateX(100, diag(1,10), 'rnorm')
-#' Y = generateY(100, 10:1, 'rnorm')
+#' X = generateX(n, diag(1,p), 'rnorm')
+#' Y = generateY(X, p:1, 'rnorm')
 #' bhat = plsBasic(X, Y, 'qxqy', q=q, regTerm='Ident', lam=1)
 plsBasic <- function(X, Y, compression=c('qxqy','qxy'), rand='rsparseBern',
                      q=NULL, regTerm=c('Ident'), Q=NULL, lam=0,...){
@@ -152,7 +152,7 @@ plsBasic <- function(X, Y, compression=c('qxqy','qxy'), rand='rsparseBern',
 #'     alternative degrees-of-freedom approximation. If requested,
 #'     (\code{divergencedf==TRUE}), this estimate is also returned.}
 #' }
-#' @export
+#' #@export
 #'
 #' @seealso plsBasic
 #'
@@ -160,8 +160,8 @@ plsBasic <- function(X, Y, compression=c('qxqy','qxy'), rand='rsparseBern',
 #' n = 100
 #' p = 5
 #' q = 50
-#' X = generateX(100, diag(1,10), 'rnorm')
-#' Y = generateY(100, 10:1, 'rnorm')
+#' X = generateX(n, diag(1,p), 'rnorm')
+#' Y = generateY(X, p:1, 'rnorm')
 #' bhat = pls(X, Y, 'linComb', q=q, regTerm='Ident', lam=1)
 pls <- function(X, Y, compression, q, rand, regTerm, SameQ, lam,
                 divergencedf=FALSE,...){
@@ -208,24 +208,115 @@ pls <- function(X, Y, compression, q, rand, regTerm, SameQ, lam,
          stop('Invalid compression type')
   )
   out = list(bhat=bhat, hatmat=NULL, df=df)
-  if(divergencedf && SameQ && regTerm=='Ident'){
-    QtQ = crossprod(Q)
-    out$divdf = divergenceF(X, Y, QtQ, qxy$bhat, qxqy$bhat, lam)$divergence
+  if(divergencedf && SameQ && regTerm=='Ident' && compression=='linComb'){
+    W = X %*% solve(crossprod(Q %*% X) + diag(lam, p)) %*% t(X)
+    out$divdf = divergenceF(X, Y, Q, W, qxy$bhat, qxqy$bhat, lam)$divergence
   }
   return(out)
 }
 
-objF <- function(alpha1, A, Y){
-  alpha2 = 1 - alpha1
-  alpha   = c(alpha1,alpha2)
-  return( sum(A%*%alpha - Y)**2 )
+
+#' Fast version of pls
+#'
+#' This version uses a C function to perform the compression without ever
+#' generating the Q matrix. There are fewer options that with \code{\link{pls}}
+#' for this reason. The divergence-based risk estimator is unavailable.
+#' An estimate of the degrees-of-freedom is returned.
+#'
+#' @param X the design matrix (n x p)
+#' @param Y the response vector (n x 1)
+#' @param compression the compression type (\code{'qxqy'}, \code{'qxy'}, \code{'linComb'}, \code{'convexComb'})
+#' @param q the compression parameter
+#' @param lam the ridge penalty
+#' @param s optional sparsity parameter for the compression matrix, defaults
+#'  to 3
+#'
+#' @return A list with components \code{bhat} (estimated coefficients) and
+#'  \code{df} (the trace of the hat matrix, possibly weighted)
+#' #@export
+#'
+#' @seealso pls
+plsFast <- function(X, Y, compression, q, lam, s=3){
+  p = ncol(X)
+  n = length(Y)
+  switch(compression,
+         qxqy = {
+           comp = compressCpp(X, q, Y, s)
+           Xn = comp$QX
+           Yn = comp$QY
+           XX = crossprod(Xn) / n
+           inv = solve(XX + lam*diag(p))
+           df = sum(colSums(XX * inv)) # already divided by n
+           bhat = inv %*% crossprod(Xn, Yn) / n
+         },
+         qxy = {
+           comp = compressCpp(X, q, Y, s)
+           Xn = comp$QX
+           XX = crossprod(Xn) / n
+           inv = solve(XX + lam*diag(p))
+           df = sum(colSums(crossprod(X) * inv)) / n
+           bhat = inv %*% crossprod(X, Y) / n
+         },
+         linComb = {
+           comp = compressCpp(X, q, Y, s)
+           Xn = comp$QX
+           Yn = comp$QY
+           XX = crossprod(Xn) / n
+           inv = solve(XX + lam*diag(p))
+           qxqy = inv %*% crossprod(Xn, Yn) / n
+           qxy  = inv %*% crossprod(X, Y) / n
+           XbhatQxy  = X%*%qxy
+           XbhatQxqy = X%*%qxqy
+           #Form linear combination
+           alphaHat = solve_robust(cbind(XbhatQxy,XbhatQxqy),Y)
+           bhat = qxy*alphaHat[1] + qxqy*alphaHat[2]
+           dfqxqy = sum(colSums(XX * inv))
+           dfqxy = sum(colSums(crossprod(X) * inv)) / n
+           df = dfqxy*alphaHat[1] + dfqxqy*alphaHat[2]
+         },
+         convexComb = {
+           comp = compressCpp(X, q, Y, s)
+           Xn = comp$QX
+           Yn = comp$QY
+           XX = crossprod(Xn) / n
+           inv = solve(XX + lam*diag(p))
+           qxqy = inv %*% crossprod(Xn, Yn) / n
+           qxy  = inv %*% crossprod(X, Y) / n
+           XbhatQxy  = X%*%qxy
+           XbhatQxqy = X%*%qxqy
+           #Form linear combination
+           A = XbhatQxy - XbhatQxqy
+           b = Y - XbhatQxqy
+           # initialVals = .5
+           # ahat.optim = optim(initialVals, fn=objF, gr=objGradF,
+           #                    A=A, b=b, method = 'L-BFGS-B',
+           #                  lower=c(0), upper=c(1), hessian=FALSE)
+           #alphaHat = c(ahat.optim$par, 1-ahat.optim$par)
+           alphaHat = max(min(crossprod(A,b)/crossprod(A),1),0)
+           alphaHat = c(alphaHat,1-alphaHat)
+           bhat = qxy*alphaHat[1] + qxqy*alphaHat[2]
+           dfqxqy = sum(colSums(XX * inv))
+           dfqxy = sum(colSums(crossprod(X) * inv)) / n
+           df = dfqxy*alphaHat[1] + dfqxqy*alphaHat[2]
+         },
+         stop('Invalid compression type')
+  )
+  out = list(bhat=bhat, df=df)
+  return(out)
 }
-objGradF <- function(alpha1, A, Y){
-  alpha2  = 1 - alpha1
-  alpha    = c(alpha1,alpha2)
-  deriv_1 = 2*t(A%*%alpha - Y) %*% A[,1]
-  return( deriv_1 )
+
+solve_robust <- function(A, b, tol=1e-10){
+  ## assumes A has 2 columns
+  AA = crossprod(A)
+  detAA = abs(AA[1]*AA[4] - AA[2]*AA[3])
+  if(detAA > tol) return(solve(AA, crossprod(A,b)))
+  else return(c(.5,.5))
 }
+
+# objF <- function(alpha, A, b) sum(A*alpha - b)^2
+
+# objGradF <- function(alpha, A, b) 2 * crossprod(A*alpha - b, A)
+
 
 
 # invX.SVD <- function(X){

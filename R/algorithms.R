@@ -9,15 +9,18 @@
 #' @param dynamic see \code{\link{BatchExperiments}}
 #' @param ... see \code{\link{BatchExperiments}}
 #'
-#' @return A list with components \code{estimRisk} and \code{ptm}. The first gives the estimation risk of the particular method while the second calculates how long the solution took to compute.
+#' @return A list with components \code{estimRisk}, \code{predRisk}, \code{baseline}, and \code{ptm}. The first gives the estimation risk of the particular method, the second is the MSE on the test set, the third is the MSE of the true coefficients, while the last calculates how long the solution took to compute.
 #' @seealso empEstimRisk
 #' @export
 plsEstimAlgo <- function(job, static, dynamic, ...){
   ptm = proc.time()
-  bhat = pls(dynamic$Xtrain, dynamic$Ytrain, ...)
+  plsout = pls(dynamic$Xtrain, dynamic$Ytrain, ...)
   ptm = proc.time()-ptm
-  estimRisk = empEstimRisk(bhat$bhat, dynamic$bstar)
-  return(list(estimRisk = estimRisk, ptm=ptm[3]))
+  estimRisk = empEstimRisk(plsout$bhat, dynamic$bstar)
+  predRisk = mean((dynamic$Ytest - dynamic$Xtest %*% plsout$bhat)^2)
+  baseline = mean((dynamic$Ytest - dynamic$Xtest %*% dynamic$bstar)^2)
+  return(list(estimRisk = estimRisk, predRisk=predRisk,
+              baseline=baseline, ptm=ptm[3]))
 }
 
 #' Calculates estimation error for OLS
@@ -27,7 +30,7 @@ plsEstimAlgo <- function(job, static, dynamic, ...){
 #'
 #' @inheritParams plsEstimAlgo
 #'
-#' @return A list with components \code{estimRisk} and \code{ptm}. The first gives the estimation risk of the particular method while the second calculates how long the solution took to compute.
+#' @return A list with components \code{estimRisk}, \code{predRisk}, \code{baseline}, and \code{ptm}. The first gives the estimation risk of the particular method, the second is the MSE on the test set, the third is the MSE of the true coefficients, while the last calculates how long the solution took to compute.
 #' @seealso empEstimRisk
 #' @export
 olsEstimAlgo <- function(job, static, dynamic, ...){
@@ -35,7 +38,10 @@ olsEstimAlgo <- function(job, static, dynamic, ...){
   bhat = qr.solve(dynamic$Xtrain, dynamic$Ytrain)
   ptm = proc.time()-ptm
   estimRisk = empEstimRisk(bhat, dynamic$bstar)
-  return(list(estimRisk = estimRisk, ptm=ptm[3]))
+  predRisk = mean((dynamic$Ytest - dynamic$Xtest %*% bhat)^2)
+  baseline = mean((dynamic$Ytest - dynamic$Xtest %*% dynamic$bstar)^2)
+  return(list(estimRisk = estimRisk, predRisk=predRisk,
+              baseline=baseline,ptm=ptm[3]))
 }
 
 #' Calculates estimation error for ridge regression (optimal lambda)
@@ -45,7 +51,7 @@ olsEstimAlgo <- function(job, static, dynamic, ...){
 #'
 #' @inheritParams plsEstimAlgo
 #'
-#' @return A list with components \code{estimRisk} and \code{ptm}. The first gives the estimation risk of the particular method while the second calculates how long the solution took to compute.
+#' @return A list with components \code{estimRisk}, \code{predRisk}, \code{baseline}, and \code{ptm}. The first gives the estimation risk of the particular method, the second is the MSE on the test set, the third is the MSE of the true coefficients, while the last calculates how long the solution took to compute.
 #' @seealso empEstimRisk
 #' @export
 ridgeEstimAlgo <- function(job, static, dynamic,...){
@@ -53,17 +59,23 @@ ridgeEstimAlgo <- function(job, static, dynamic,...){
   ridgeOut = ridgeRegression(dynamic$Xtrain, dynamic$Ytrain,...)
   ptm = proc.time()-ptm
   estimRisk = empEstimRisk(ridgeOut$bhat, dynamic$bstar)
-  return(list(estimRisk = estimRisk, lamStar=ridgeOut$lamStar, ptm=ptm[3]))
+  predRisk = mean((dynamic$Ytest - dynamic$Xtest %*% ridgeOut$bhat)^2)
+  baseline = mean((dynamic$Ytest - dynamic$Xtest %*% dynamic$bstar)^2)
+  return(list(estimRisk = estimRisk, predRisk=predRisk,
+              baseline=baseline, lamStar=ridgeOut$lamStar, ptm=ptm[3]))
 }
 
-#' Calculates estimation error for ridge regression (optimal fixed lambda)
+
+
+#' Calculates estimation error for ridge regression (GCV-minimizing
+#'  lambda)
 #'
 #' This function is used by \code{\link{BatchExperiments}} to run the simulations.
 #' See that package for documentation.
 #'
 #' @inheritParams plsEstimAlgo
 #'
-#' @return A list with components \code{estimRisk} and \code{ptm}. The first gives the estimation risk of the particular method while the second calculates how long the solution took to compute.
+#' @return A list with components \code{estimRisk}, \code{predRisk}, \code{baseline}, and \code{ptm}. The first gives the estimation risk of the particular method, the second is the MSE on the test set, the third is the MSE of the true coefficients, while the last calculates how long the solution took to compute.
 #' @seealso empEstimRisk
 #' @export
 ridgeEstimAlgoLam <- function(job, static, dynamic,...){
@@ -71,46 +83,100 @@ ridgeEstimAlgoLam <- function(job, static, dynamic,...){
   ridgeOut = ridgeRegressionLam(dynamic$Xtrain, dynamic$Ytrain,...)
   ptm = proc.time()-ptm
   estimRisk = empEstimRisk(ridgeOut, dynamic$bstar)
-  return(list(estimRisk = estimRisk, ptm=ptm[3]))
+  predRisk = mean((dynamic$Ytest - dynamic$Xtest %*% ridgeOut)^2)
+  baseline = mean((dynamic$Ytest - dynamic$Xtest %*% dynamic$bstar)^2)
+  return(list(estimRisk = estimRisk, predRisk=predRisk,
+              baseline=baseline, ptm=ptm[3]))
+}
+
+#' Calculates degrees of freedom for compressed methods
+#'
+#' @inheritParams plsEstimAlgo
+#' @return A list with components:
+#' \describe{
+#'  \item{\code{df}}{the (exact or approximate) degrees of freedom using the
+#'  smoothing matrix}
+#'  \item{\code{steinR}}{the SURE estimate of the risk using \code{df}}
+#'  \item{\code{gcvR}}{the GCV estimate of the risk using \code{df}}
+#'  \item{\code{divdf}}{the divergence-based degrees-of-freedom estimator for
+#'  the combined methods}
+#'  \item{\code{steindivR}}{the SURE estimate of the risk using \code{divdf}}
+#'  \item{\code{gcvdivR}}{the GCV estimate of the risk using \code{divdf}}
+#'  \item{\code{train}}{the training error}
+#'  \item{\code{test}}{the testing error}
+#'  }
+#'
+#' @export
+plsRiskEstimAlgo <- function(job, static, dynamic,...){
+  plsout = pls(dynamic$Xtrain, dynamic$Ytrain, ...)
+  steinR = steinRisk(dynamic$Xtrain, dynamic$Ytrain, plsout$bhat, plsout$df)
+  gcvR = gcvRisk(dynamic$Xtrain, dynamic$Ytrain, plsout$bhat, plsout$df)
+  train = mean((dynamic$Ytrain - dynamic$Xtrain %*% plsout$bhat)^2)
+  test = mean((dynamic$Ytest - dynamic$Xtest %*% plsout$bhat)^2)
+  if(is.null(plsout$divdf)){
+    steindivR = NA
+    gcvdivR = NA
+  }else{
+    steindivR = steinRisk(dynamic$Xtrain, dynamic$Ytrain, plsout$bhat,
+                           plsout$divdf)
+    gcvdivR = gcvRisk(dynamic$Xtrain, dynamic$Ytrain, plsout$bhat,
+                       plsout$divdf)
+  }
+  return(list(df=plsout$df, steinR=steinR, gcvR=gcvR,
+              divdf=plsout$divdf, steindivR=steindivR, gcvdivR=gcvdivR,
+              train=train, test=test))
+}
+
+#' Calculates degrees of freedom for ridge regression
+#'
+#' @inheritParams plsEstimAlgo
+#' @return A list with components:
+#' \describe{
+#'  \item{\code{test}}{the testing error}
+#'  \item{\code{train}}{the training error}
+#'  \item{\code{df}}{the degrees of freedom using the
+#'  smoothing matrix}
+#'  \item{\code{gcvR}}{the GCV estimate of the risk using \code{df}}
+#'  \item{\code{steinR}}{the SURE estimate of the risk using \code{df}}
+#'  \item{\code{lamStar}}{the lambda value used, chosen via GCV}
+#'  }
+#'
+#' @export
+ridgePredAlgo <- function(job, static, dynamic,...){
+  ridgeOut = ridgeRegression(dynamic$Xtrain, dynamic$Ytrain,...)
+  test = mean((dynamic$Ytest - dynamic$Xtest %*% ridgeOut$bhat)^2)
+  train = mean((dynamic$Ytrain - dynamic$Xtrain %*% ridgeOut$bhat)^2)
+  df = sum(colSums(crossprod(dynamic$Xtrain) *
+                  solve(crossprod(dynamic$Xtrain) + ridgeOut$lamStar *
+                          diag(ncol(dynamic$Xtrain)))))
+  gcvR = gcvRisk(dynamic$Xtrain, dynamic$Ytrain, ridgeOut$bhat, df)
+  steinR = steinRisk(dynamic$Xtrain, dynamic$Ytrain, ridgeOut$bhat, df)
+  return(list(test = test, train=train, df=df, gcvR=gcvR,
+              steinR=steinR, lamStar=ridgeOut$lamStar))
 }
 
 
-#' Calculates prediction error for PLS
-#'
-#' This function is used by \code{\link{BatchExperiments}} to run the simulations.
-#' See that package for documentation.
+#' Calculates degrees of freedom for OLS
 #'
 #' @inheritParams plsEstimAlgo
+#' @return A list with components:
+#' \describe{
+#'  \item{\code{train}}{the training error}
+#'  \item{\code{test}}{the testing error}
+#'  \item{\code{df}}{the degrees of freedom using the
+#'  smoothing matrix}
+#'  \item{\code{steinR}}{the SURE estimate of the risk using \code{df}}
+#'  \item{\code{gcvR}}{the GCV estimate of the risk using \code{df}}
+#'  }
 #'
-#' @return A list with components \code{risk}, \code{bias}, \code{var}, \code{noiseVar}, and \code{ptm}. These give, respectively, the prediction risk, the bias, the variance, the noise variance, and the computation time.
-#' @seealso empPredRisk, predBias, predVar
-plsAlgorithm <- function(job, static, dynamic, ...){
-  ptm = proc.time()
-  plsOut = pls(dynamic$Xtrain, dynamic$Ytrain, ...)
-  ptm = proc.time()-ptm
-  risk = empPredRisk(plsOut$bhat, dynamic$Xtest, dynamic$Ytest)
-  sqbiasPred = predBias(dynamic$bstar, dynamic$Xtest, plsOut$XstuffTrain, plsOut$bhat)
-  varPred = predVar(dynamic$sig, dynamic$Xtest, plsOut$XstuffTrain, plsOut$bhat)
-  return(list(risk=risk, bias=sqbiasPred, var=varPred,  noiseVar = dynamic$sig^2, ptm=ptm[3]))
-}
-
-#' Calculates prediction error for OLS
-#'
-#' This function is used by \code{\link{BatchExperiments}} to run the simulations.
-#' See that package for documentation.
-#'
-#' @inheritParams plsEstimAlgo
-#'
-#' @return A list with components \code{risk}, \code{bias}, \code{var}, \code{noiseVar}, and \code{ptm}. These give, respectively, the prediction risk, the bias, the variance, the noise variance, and the computation time.
-#' @seealso empPredRisk, predBias, predVar
-olsAlgorithm <- function(job, static, dynamic){
-  ptm = proc.time()
-  bhat = qr.solve(dynamic$Xtrain, dynamic$Ytrain)
-  ptm = proc.time()-ptm
-  Xstufffun <- function(X) solve(t(X) %*% X) %*% t(X)
-  Xstuff = Xstufffun(dynamic$Xtrain)
-  risk = empPredRisk(bhat, dynamic$Xtest, dynamic$Ytest)
-  sqbiasPred = predBias(dynamic$bstar, dynamic$Xtest, Xstuff)
-  varPred = predVar(dynamic$sig, dynamic$Xtest, Xstuff)
-  return(list(risk=risk, bias=sqbiasPred, var=varPred, noiseVar = dynamic$sig^2, ptm=ptm[3]))
+#' @export
+olsPredAlgo <- function(job, static, dynamic,...){
+  ols = qr.solve(dynamic$Xtrain, dynamic$Ytrain)
+  test = mean((dynamic$Ytest - dynamic$Xtest %*% ols)^2)
+  train = mean((dynamic$Ytrain - dynamic$Xtrain %*% ols)^2)
+  df = ncol(dynamic$Xtrain)
+  gcvR = gcvRisk(dynamic$Xtrain, dynamic$Ytrain, ols, df)
+  steinR = steinRisk(dynamic$Xtrain, dynamic$Ytrain, ols, df)
+  return(list(test = test, train=train, df=df, gcvR=gcvR,
+              steinR=steinR))
 }

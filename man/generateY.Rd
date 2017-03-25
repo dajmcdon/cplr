@@ -26,4 +26,3 @@ X = generateX(100, diag(1,10), 'rsparseBern')
 b = generateb(10, 'constNorm')
 Y = generateY(X, b, 'rnorm', sd=.1)
 }
-

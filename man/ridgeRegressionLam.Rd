@@ -19,4 +19,3 @@ A vector of coefficients
 \description{
 Computes the ridge regression estimate for a fixed value of lambda.
 }
-

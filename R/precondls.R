@@ -9,3 +9,7 @@
 #' @docType package
 #' @name precondls
 NULL
+
+#' @useDynLib precondls
+#' @importFrom Rcpp sourceCpp
+NULL
