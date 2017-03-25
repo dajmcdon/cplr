@@ -1,6 +1,6 @@
 #' @export
 plot.cplr <- function(x, ...){
-  matplot(x$lam, t(x$bhatsc), type = "l", ...)
+  matplot(x$lam, t(x$bhat), type = "l", ...)
 }
 
 #' @export
