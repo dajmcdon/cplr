@@ -19,5 +19,7 @@ LazyData: TRUE
 RoxygenNote: 6.0.1
 Suggests: mseq,
     BatchExperiments
+URL: http://github.com/dajmcdon/cplr
+BugReports: http://github.com/dajmcdon/cplr/issues
 LinkingTo: Rcpp
 Imports: Rcpp
