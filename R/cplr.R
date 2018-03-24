@@ -12,4 +12,6 @@ NULL
 
 #' @useDynLib cplr
 #' @importFrom Rcpp sourceCpp
+#' @import stats
+#' @importFrom  graphics matplot
 NULL

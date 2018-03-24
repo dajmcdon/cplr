@@ -12,7 +12,7 @@
 #' @return A qxn matrix of random numbers
 #' #@export
 #'
-#' @examples
+#' #@examples
 #' generateQ(5, 10)
 generateQ <- function(q, n, rand='rsparseBern', normalize = sqrt(q/3),...){
   rand = get(rand)
@@ -31,7 +31,7 @@ generateQ <- function(q, n, rand='rsparseBern', normalize = sqrt(q/3),...){
 #' @return Vector of random sparse Bernoulli draws
 #' #@export
 #'
-#' @examples
+#' #@examples
 #' rsparseBern(10)
 #' rsparseBern(10, 10)
 rsparseBern <- function(n, s=3){
@@ -74,7 +74,7 @@ rsparseBern <- function(n, s=3){
 #'  matrix), and \code{df} (the degrees of freedom, trace of \code{hatmat}).
 #' #@export
 #'
-#' @examples
+#' #@examples
 #' n = 100
 #' p = 5
 #' q = 50
@@ -156,7 +156,7 @@ plsBasic <- function(X, Y, compression=c('qxqy','qxy'), rand='rsparseBern',
 #'
 #' @seealso plsBasic
 #'
-#' @examples
+#' #@examples
 #' n = 100
 #' p = 5
 #' q = 50
@@ -312,17 +312,3 @@ solve_robust <- function(A, b, tol=1e-10){
   if(detAA > tol) return(solve(AA, crossprod(A,b)))
   else return(c(.5,.5))
 }
-
-# objF <- function(alpha, A, b) sum(A*alpha - b)^2
-
-# objGradF <- function(alpha, A, b) 2 * crossprod(A*alpha - b, A)
-
-
-
-# invX.SVD <- function(X){
-#   S = svd(X, nu=0)
-#   VDinv2Vt = scale(S$v, center=FALSE, scale=S$d^2) %*% t(S$v)
-#   return(VDinv2Vt)
-# }
-
-

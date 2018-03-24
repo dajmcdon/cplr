@@ -6,16 +6,26 @@
 using namespace Rcpp;
 
 // compressCpp
-List compressCpp(NumericMatrix X, int q, NumericVector Y, int s);
-RcppExport SEXP cplr_compressCpp(SEXP XSEXP, SEXP qSEXP, SEXP YSEXP, SEXP sSEXP) {
+List compressCpp(NumericMatrix const& X, int q, NumericVector const& Y, int s);
+RcppExport SEXP _cplr_compressCpp(SEXP XSEXP, SEXP qSEXP, SEXP YSEXP, SEXP sSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix const& >::type X(XSEXP);
     Rcpp::traits::input_parameter< int >::type q(qSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< NumericVector const& >::type Y(YSEXP);
     Rcpp::traits::input_parameter< int >::type s(sSEXP);
     rcpp_result_gen = Rcpp::wrap(compressCpp(X, q, Y, s));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_cplr_compressCpp", (DL_FUNC) &_cplr_compressCpp, 4},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_cplr(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

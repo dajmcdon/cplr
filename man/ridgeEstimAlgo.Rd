@@ -7,19 +7,19 @@
 ridgeEstimAlgo(job, static, dynamic, ...)
 }
 \arguments{
-\item{job}{see \code{\link{BatchExperiments}}}
+\item{job}{see \code{BatchExperiments}}
 
-\item{static}{see \code{\link{BatchExperiments}}}
+\item{static}{see \code{BatchExperiments}}
 
-\item{dynamic}{see \code{\link{BatchExperiments}}}
+\item{dynamic}{see \code{BatchExperiments}}
 
-\item{...}{see \code{\link{BatchExperiments}}}
+\item{...}{see \code{BatchExperiments}}
 }
 \value{
 A list with components \code{estimRisk}, \code{predRisk}, \code{baseline}, and \code{ptm}. The first gives the estimation risk of the particular method, the second is the MSE on the test set, the third is the MSE of the true coefficients, while the last calculates how long the solution took to compute.
 }
 \description{
-This function is used by \code{\link{BatchExperiments}} to run the simulations.
+This function is used by \code{\link[=https://cran.r-project.org/web/packages/BatchExperiments/index.html]{BatchExperiments}} to run the simulations.
 See that package for documentation.
 }
 \seealso{

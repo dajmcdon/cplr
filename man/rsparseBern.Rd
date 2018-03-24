@@ -14,11 +14,11 @@ rsparseBern(n, s = 3)
 \value{
 Vector of random sparse Bernoulli draws
 #@export
+
+#@examples
+rsparseBern(10)
+rsparseBern(10, 10)
 }
 \description{
 The sparse Bernoulli distribution puts mass on the set \eqn{\{-1, 0, 1\}} with probabilities \eqn{\{1/2s, 1-1/s, 1/2s\}}.
-}
-\examples{
-rsparseBern(10)
-rsparseBern(10, 10)
 }

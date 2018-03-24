@@ -32,6 +32,14 @@ a list with components \code{bhat} (the
  coefficient vector), \code{hatmat} (the smoothing
  matrix), and \code{df} (the degrees of freedom, trace of \code{hatmat}).
 #@export
+
+#@examples
+n = 100
+p = 5
+q = 50
+X = generateX(n, diag(1,p), 'rnorm')
+Y = generateY(X, p:1, 'rnorm')
+bhat = plsBasic(X, Y, 'qxqy', q=q, regTerm='Ident', lam=1)
 }
 \description{
 This is the main function in this package. It computes different forms of compressed least squares regression.
@@ -50,12 +58,4 @@ similarly extending X with \eqn{\lambda I}. With this interpretation, we would
 compress the extension as well either fully or partially. Therefore, the
 \code{regTerm} can be \code{'Ident'} (standard case), \code{'QtQ'} (data
 augmentation version), or \code{'zero'} (no regularization).
-}
-\examples{
-n = 100
-p = 5
-q = 50
-X = generateX(n, diag(1,p), 'rnorm')
-Y = generateY(X, p:1, 'rnorm')
-bhat = plsBasic(X, Y, 'qxqy', q=q, regTerm='Ident', lam=1)
 }

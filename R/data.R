@@ -14,7 +14,7 @@
 #'
 #' The datasets beginning with \code{w} are also from mice and due to the Wold group \url{http://www.nature.com/nmeth/journal/v5/n7/full/nmeth.1226.html}.
 #'
-#' @source These data were downloaded from Prof. Jun Li and then processed using his package \code{\link{mseq}} \url{http://www3.nd.edu/~jli9/mseq/data_top100.zip}.
+#' @source These data were downloaded from Prof. Jun Li and then processed using his package \code{\link[=https://cran.r-project.org/web/packages/mseq/index.html]{mseq}} \url{http://www3.nd.edu/~jli9/mseq/data_top100.zip}.
 NULL
 
 #' @rdname genes

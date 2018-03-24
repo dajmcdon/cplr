@@ -3,7 +3,7 @@ using namespace Rcpp;
 
 
 // [[Rcpp::export]]
-List compressCpp(NumericMatrix X, int q, NumericVector Y, int s) {
+List compressCpp(NumericMatrix const &X, int q, NumericVector const &Y, int s) {
   int p = X.ncol();
   int n = X.nrow();
 
@@ -36,5 +36,3 @@ List compressCpp(NumericMatrix X, int q, NumericVector Y, int s) {
   return List::create(Named("QX") = QX / rescale,
                       Named("QY") = QY / rescale);
 }
-
-

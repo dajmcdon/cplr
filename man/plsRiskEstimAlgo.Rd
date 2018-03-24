@@ -7,13 +7,13 @@
 plsRiskEstimAlgo(job, static, dynamic, ...)
 }
 \arguments{
-\item{job}{see \code{\link{BatchExperiments}}}
+\item{job}{see \code{BatchExperiments}}
 
-\item{static}{see \code{\link{BatchExperiments}}}
+\item{static}{see \code{BatchExperiments}}
 
-\item{dynamic}{see \code{\link{BatchExperiments}}}
+\item{dynamic}{see \code{BatchExperiments}}
 
-\item{...}{see \code{\link{BatchExperiments}}}
+\item{...}{see \code{BatchExperiments}}
 }
 \value{
 A list with components:

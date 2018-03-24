@@ -1,13 +1,13 @@
 
 #' Calculates estimation error for PLS
 #'
-#' This function is used by \code{\link{BatchExperiments}} to run the simulations.
+#' This function is used by \code{\link[=https://cran.r-project.org/web/packages/BatchExperiments/index.html]{BatchExperiments}} to run the simulations.
 #' See that package for documentation.
 #'
-#' @param job see \code{\link{BatchExperiments}}
-#' @param static see \code{\link{BatchExperiments}}
-#' @param dynamic see \code{\link{BatchExperiments}}
-#' @param ... see \code{\link{BatchExperiments}}
+#' @param job see \code{BatchExperiments}
+#' @param static see \code{BatchExperiments}
+#' @param dynamic see \code{BatchExperiments}
+#' @param ... see \code{BatchExperiments}
 #'
 #' @return A list with components \code{estimRisk}, \code{predRisk}, \code{baseline}, and \code{ptm}. The first gives the estimation risk of the particular method, the second is the MSE on the test set, the third is the MSE of the true coefficients, while the last calculates how long the solution took to compute.
 #' @seealso empEstimRisk
@@ -25,7 +25,7 @@ plsEstimAlgo <- function(job, static, dynamic, ...){
 
 #' Calculates estimation error for OLS
 #'
-#' This function is used by \code{\link{BatchExperiments}} to run the
+#' This function is used by \code{\link[=https://cran.r-project.org/web/packages/BatchExperiments/index.html]{BatchExperiments}} to run the
 #' simulations. See that package for documentation.
 #'
 #' @inheritParams plsEstimAlgo
@@ -46,7 +46,7 @@ olsEstimAlgo <- function(job, static, dynamic, ...){
 
 #' Calculates estimation error for ridge regression (optimal lambda)
 #'
-#' This function is used by \code{\link{BatchExperiments}} to run the simulations.
+#' This function is used by \code{\link[=https://cran.r-project.org/web/packages/BatchExperiments/index.html]{BatchExperiments}} to run the simulations.
 #' See that package for documentation.
 #'
 #' @inheritParams plsEstimAlgo
@@ -70,7 +70,7 @@ ridgeEstimAlgo <- function(job, static, dynamic,...){
 #' Calculates estimation error for ridge regression (GCV-minimizing
 #'  lambda)
 #'
-#' This function is used by \code{\link{BatchExperiments}} to run the simulations.
+#' This function is used by \code{\link[=https://cran.r-project.org/web/packages/BatchExperiments/index.html]{BatchExperiments}} to run the simulations.
 #' See that package for documentation.
 #'
 #' @inheritParams plsEstimAlgo

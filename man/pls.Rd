@@ -64,14 +64,14 @@ This method can use the same Q or different Q matrices and any type of regulariz
 
 The second method, 'convexComb', is similar, though it first finds the fully and partially compressed versions using the same Q with the identity regularization. It then finds a convex combination of the fitted values. That is, it also solves \deqn{min ||[Yhat_{qxqy}, Yhat_{qxy}]a - Y||} subject to the constraint that \eqn{a=[a1, 1-a1]} with \eqn{a1 \in [0,1]}.
 }
-\examples{
+\seealso{
+plsBasic
+
+#@examples
 n = 100
 p = 5
 q = 50
 X = generateX(n, diag(1,p), 'rnorm')
 Y = generateY(X, p:1, 'rnorm')
 bhat = pls(X, Y, 'linComb', q=q, regTerm='Ident', lam=1)
-}
-\seealso{
-plsBasic
 }

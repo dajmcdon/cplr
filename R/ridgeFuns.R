@@ -11,7 +11,7 @@ pls_scale <- function(X, y, n=nrow(X), p=ncol(X)){
 ridge_svd <- function(S, scaled,
                       type = c('xy','qxqy','qxy'), comp,
                       lam=NULL, lam.max=NULL, lam.min=1e-6, nlam=100,
-                      tol.lam0=1e-10){
+                      tol.lam0=1e-10, divstuff=FALSE){
   n = nrow(scaled$Xs)
   p = ncol(scaled$Xs)
   type = match.arg(type)
@@ -21,7 +21,7 @@ ridge_svd <- function(S, scaled,
   Xscale = scaled$Xscale
   ym = scaled$ym
 
-  U = S$u
+  U = S$u # QX = UDV' = SLR' in paper
   d = S$d # / sqrt(n)
   dx = length(d)
   V = S$v
@@ -35,24 +35,34 @@ ridge_svd <- function(S, scaled,
   lam = fix_lam(d, p, lam, lam.max, lam.min, nlam, rhs, tol.lam0)
 
   k = length(lam)
-  div = d^2 + rep(lam, rep(dx, k))
-  if(type=='qxy') a = drop(rhs)/div
-  else a = drop(d * rhs)/div
-  dim(a) = c(dx, k)
-  bhatsc = V %*% a
-  mat = matrix(d^2/div, dx)
+  div = d^2 + rep(lam, rep(dx, k)) # dx x k
+  if(type=='qxy') a = drop(rhs)/div # dx x k
+  else a = drop(d * rhs)/div # dx x k
+  dim(a) = c(dx, k) # dx x k
+  bhatsc = V %*% a # p x k
+  mat = matrix(d^2/div, dx) # dx x k
   df = switch(type,
               'xy' = colSums(mat) + 1,
               'qxqy' = colSums(mat) + 1,
               'qxy' = colSums(XV^2) %*% matrix(1/div, dx) + 1
   )
   fitted = scaled$Xs %*% bhatsc
-  residuals = c(ys) - scaled$Xs %*% bhatsc
+  residuals = c(ys) - fitted # scaled$Xs %*% bhatsc
   train = colMeans( (residuals)^2 )
   GCV = train / (1-df/n)^2
   bhat = bhatsc/Xscale
   bhat0 = ym - colSums(bhat*Xm)
-  out = list(intercept=bhat0, bhat=bhat, bhatsc=bhatsc,
+  if(divstuff) {
+      divstuff = switch(type,
+                        'xy' = NULL,
+                        'qxqy' = list(divLSQY=a, L2=d^2, fitted=fitted),
+                        'qxy' = list(RXY=rhs, div=div, L2div=mat,
+                                     divRXY=a, XR=XV,Ys=c(ys),fitted=fitted)
+                        )
+  }else{
+      divstuff = NULL
+  }
+  out = list(intercept=bhat0, bhat=bhat, bhatsc=bhatsc, divstuff=divstuff,
              fitted=fitted, residuals=residuals, GCV=GCV, lam=lam, df=df,
              train=train)
   class(out) = 'cplr'
@@ -109,7 +119,8 @@ ridge_svd <- function(S, scaled,
 #' X = generateX(n, diag(1,p), 'rnorm')
 #' Y = generateY(X, p:1, 'rnorm')
 #' out = compressedRidge(X, Y, 'linComb', q=q, lam.max=1)
-compressedRidge <- function(X, Y, compression = c('xy','qxqy','qxy','linComb','convexComb'),
+compressedRidge <- function(X, Y,
+                            compression = c('xy','qxqy','qxy','linComb','convexComb'),
                             q, lam=NULL, lam.max = NULL, lam.min=1e-6, nlam=100, s=3,
                             tol.lam0=1e-8, tol.lc=1e-10){
   type = match.arg(compression)
@@ -123,21 +134,24 @@ compressedRidge <- function(X, Y, compression = c('xy','qxqy','qxy','linComb','c
   switch(type,
          xy = {
            S = svd(scaled$Xs)
-           return(ridge_svd(S, scaled, type='xy', NULL, lam, lam.max, lam.min, nlam, tol.lam0))
+           return(ridge_svd(S, scaled, type='xy', NULL, lam, lam.max,
+                            lam.min, nlam, tol.lam0))
          },
          qxqy = {
-           return(ridge_svd(S, scaled, type='qxqy',comp, lam, lam.max, lam.min, nlam, tol.lam0))
+           return(ridge_svd(S, scaled, type='qxqy',comp, lam, lam.max,
+                            lam.min, nlam, tol.lam0))
          },
          qxy = {
-           return(ridge_svd(S, scaled, type='qxy',comp, lam, lam.max, lam.min, nlam, tol.lam0))
+           return(ridge_svd(S, scaled, type='qxy',comp, lam, lam.max,
+                            lam.min, nlam, tol.lam0))
          },
          linComb = {
-           return(compress_Comb(S, scaled, comp, lam, lam.max, lam.min, nlam, ahat_linComb,
-                                tol.lam0, tol.lc))
+           return(compress_Comb(S, scaled, comp, lam, lam.max, lam.min,
+                                nlam, ahat_linComb,tol.lam0, tol.lc))
          },
          convexComb = {
-           return(compress_Comb(S, scaled, comp, lam, lam.max, lam.min, nlam, ahat_convexComb,
-                                tol.lam0, tol.lc))
+           return(compress_Comb(S, scaled, comp, lam, lam.max, lam.min,
+                                nlam, ahat_convexComb,tol.lam0, tol.lc))
          }
            )
 }
@@ -155,7 +169,7 @@ fix_lam <- function(d, p, lam, lam.max, lam.min, nlam, rhs, tol.lam0 = 1e-10){
 }
 
 ahat_linComb <- function(Xs, qxy, qxqy, Ys, nlam, tol){
-  Yhat = rbind(Xs %*% qxy$bhatsc, Xs %*% qxqy$bhatsc)
+  Yhat = rbind(qxy$fitted, qxqy$fitted)
   dim(Yhat) = c(nrow(Xs),2,nlam)
   ahat = apply(Yhat, 3, function(Yh){ # a 2 x nlam matrix
     fit = lm.fit(Yh, Ys)
@@ -168,12 +182,14 @@ ahat_linComb <- function(Xs, qxy, qxqy, Ys, nlam, tol){
   )
   aqxy = matrix(ahat[1,], nrow=ncol(Xs), ncol=nlam, byrow=TRUE)
   aqxqy = matrix(ahat[2,], nrow=ncol(Xs), ncol=nlam, byrow=TRUE)
-  return(list(aqxy = aqxy, aqxqy = aqxqy))
+  return(list(aqxy = aqxy, aqxqy = aqxqy, yh = Yhat))
 }
 
 ahat_convexComb <- function(Xs, qxy, qxqy, Ys, nlam, tol){
-  yhat1 = Xs %*% qxy$bhatsc
-  yhat2 = Xs %*% qxqy$bhatsc
+  yhat1 = qxy$fitted
+  yhat2 = qxqy$fitted
+  Yhat = rbind(yhat1, yhat2)
+  dim(Yhat) = c(nrow(Xs),2,nlam)
   A = yhat1 - yhat2
   b = drop(Ys) - yhat2
   AtA = colSums(A^2)
@@ -186,23 +202,32 @@ ahat_convexComb <- function(Xs, qxy, qxqy, Ys, nlam, tol){
   return(list(aqxy = aqxy, aqxqy = aqxqy))
 }
 
-compress_Comb <- function(S, scaled, comp, lam, lam.max, lam.min, nlam, ahatfun, tol.lam0, tol.lc){
+compress_Comb <- function(S, scaled, comp, lam, lam.max, lam.min, nlam,
+                          ahatfun, tol.lam0, tol.lc){
   n = length(scaled$ys)
-  qxy = ridge_svd(S, scaled, 'qxy', comp, lam, lam.max, lam.min, nlam, tol.lam0)
+  qxy = ridge_svd(S, scaled, 'qxy', comp, lam, lam.max, lam.min,
+                  nlam, tol.lam0, divstuff=TRUE)
   if(is.null(lam)) lam=qxy$lam
-  qxqy = ridge_svd(S, scaled, 'qxqy', comp, lam)
+  qxqy = ridge_svd(S, scaled, 'qxqy', comp, lam, divstuff=TRUE)
   ahat = ahatfun(scaled$Xs, qxy, qxqy, scaled$ys, length(lam), tol.lc)
   bhatsc = qxy$bhatsc * ahat$aqxy + qxqy$bhatsc * ahat$aqxqy
   bhat = bhatsc/scaled$Xscale
   bhat0 = scaled$ym - colSums(bhat*scaled$Xm)
   df = pmin(drop(qxy$df * ahat$aqxy[1,] + qxqy$df * ahat$aqxqy[1,]),n)
   fitted = scaled$Xs %*% bhatsc
+  if(is.null(ahat$yh)){
+    div = divergence_CC(ahat, fitted, df, qxy$divstuff, qxqy$divstuff, tol.lc)
+  }else{
+    div = divergence_LC(ahat, S, fitted, df, qxy$divstuff, qxy$bhatsc,
+                        qxqy$divstuff, qxqy$bhatsc, tol.lc)
+  }
   residuals = c(scaled$ys) - scaled$Xs %*% bhatsc
   train = colMeans( (residuals)^2 )
   GCV = train / (1-df/n)^2
   out = list(intercept=bhat0, bhat=bhat, bhatsc = bhatsc,
              fitted=fitted, residuals=residuals, GCV=GCV, lam=lam, df=df,
-             train=train)
+             div=div, train=train, ahat = rbind(ahat$aqxy[1,],ahat$aqxqy[1,]))
   class(out) = 'cplr'
   return(out)
 }
+
