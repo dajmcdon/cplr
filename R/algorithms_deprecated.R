@@ -11,7 +11,7 @@
 #'
 #' @return A list with components \code{estimRisk}, \code{predRisk}, \code{baseline}, and \code{ptm}. The first gives the estimation risk of the particular method, the second is the MSE on the test set, the third is the MSE of the true coefficients, while the last calculates how long the solution took to compute.
 #' @seealso empEstimRisk
-#' @export
+#' #@export
 plsEstimAlgo <- function(job, static, dynamic, ...){
   ptm = proc.time()
   plsout = pls(dynamic$Xtrain, dynamic$Ytrain, ...)
@@ -32,7 +32,7 @@ plsEstimAlgo <- function(job, static, dynamic, ...){
 #'
 #' @return A list with components \code{estimRisk}, \code{predRisk}, \code{baseline}, and \code{ptm}. The first gives the estimation risk of the particular method, the second is the MSE on the test set, the third is the MSE of the true coefficients, while the last calculates how long the solution took to compute.
 #' @seealso empEstimRisk
-#' @export
+#' #@export
 olsEstimAlgo <- function(job, static, dynamic, ...){
   ptm = proc.time()
   bhat = qr.solve(dynamic$Xtrain, dynamic$Ytrain)
@@ -53,7 +53,7 @@ olsEstimAlgo <- function(job, static, dynamic, ...){
 #'
 #' @return A list with components \code{estimRisk}, \code{predRisk}, \code{baseline}, and \code{ptm}. The first gives the estimation risk of the particular method, the second is the MSE on the test set, the third is the MSE of the true coefficients, while the last calculates how long the solution took to compute.
 #' @seealso empEstimRisk
-#' @export
+#' #@export
 ridgeEstimAlgo <- function(job, static, dynamic,...){
   ptm = proc.time()
   ridgeOut = ridgeRegression(dynamic$Xtrain, dynamic$Ytrain,...)
@@ -77,7 +77,7 @@ ridgeEstimAlgo <- function(job, static, dynamic,...){
 #'
 #' @return A list with components \code{estimRisk}, \code{predRisk}, \code{baseline}, and \code{ptm}. The first gives the estimation risk of the particular method, the second is the MSE on the test set, the third is the MSE of the true coefficients, while the last calculates how long the solution took to compute.
 #' @seealso empEstimRisk
-#' @export
+#' #@export
 ridgeEstimAlgoLam <- function(job, static, dynamic,...){
   ptm = proc.time()
   ridgeOut = ridgeRegressionLam(dynamic$Xtrain, dynamic$Ytrain,...)
@@ -106,7 +106,7 @@ ridgeEstimAlgoLam <- function(job, static, dynamic,...){
 #'  \item{\code{test}}{the testing error}
 #'  }
 #'
-#' @export
+#' #@export
 plsRiskEstimAlgo <- function(job, static, dynamic,...){
   plsout = pls(dynamic$Xtrain, dynamic$Ytrain, ...)
   steinR = steinRisk(dynamic$Xtrain, dynamic$Ytrain, plsout$bhat, plsout$df)
@@ -141,7 +141,7 @@ plsRiskEstimAlgo <- function(job, static, dynamic,...){
 #'  \item{\code{lamStar}}{the lambda value used, chosen via GCV}
 #'  }
 #'
-#' @export
+#' #@export
 ridgePredAlgo <- function(job, static, dynamic,...){
   ridgeOut = ridgeRegression(dynamic$Xtrain, dynamic$Ytrain,...)
   test = mean((dynamic$Ytest - dynamic$Xtest %*% ridgeOut$bhat)^2)
@@ -169,7 +169,7 @@ ridgePredAlgo <- function(job, static, dynamic,...){
 #'  \item{\code{gcvR}}{the GCV estimate of the risk using \code{df}}
 #'  }
 #'
-#' @export
+#' #@export
 olsPredAlgo <- function(job, static, dynamic,...){
   ols = qr.solve(dynamic$Xtrain, dynamic$Ytrain)
   test = mean((dynamic$Ytest - dynamic$Xtest %*% ols)^2)

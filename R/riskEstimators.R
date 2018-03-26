@@ -6,7 +6,7 @@
 #'  \deqn{\sum (X \hat{beta} - Y)^2 / (1 - df/n)^2}
 #'
 #' @return The risk estimate.
-#' @export
+#' #@export
 gcvRisk <- function(X, Y, bhat, df){
   n = length(Y)
   mse = mean((X %*% bhat - Y)^2)
@@ -23,7 +23,7 @@ gcvRisk <- function(X, Y, bhat, df){
 #'
 #' @return The risk estimate. Note that this is not necessarily unbiased as the variance is unknown
 #'  and the estimator used here is not necessarily unbiased.
-#' @export
+#' #@export
 steinRisk <- function(X, Y, bhat, df){
   n = length(Y)
   sse = sum((X %*% bhat - Y)^2)

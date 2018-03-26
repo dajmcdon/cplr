@@ -18,6 +18,7 @@ steinRisk(X, Y, bhat, df)
 \value{
 The risk estimate. Note that this is not necessarily unbiased as the variance is unknown
  and the estimator used here is not necessarily unbiased.
+#@export
 }
 \description{
 Computes Stein's Risk Estimate

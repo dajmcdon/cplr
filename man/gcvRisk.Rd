@@ -17,6 +17,7 @@ gcvRisk(X, Y, bhat, df)
 }
 \value{
 The risk estimate.
+#@export
 }
 \description{
 Generalized cross validation risk estimate
