@@ -24,5 +24,5 @@ Returns a \code{n x ncol(covMatSqrt)} matrix.
 Generates the design matrix
 }
 \examples{
-generateX(100, diag(1,10), 'rsparseBern')
+generateX(100, diag(1,10), 'rnorm')
 }

@@ -11,7 +11,7 @@ ridgeRegression(X, Y, lam.upper = min(dim(X)))
 
 \item{Y}{response vector}
 
-\item{lamLimits}{a vector with the smallest and largest lambda values to try}
+\item{lam.upper}{a vector with the smallest and largest lambda values to try}
 }
 \value{
 A list containing th vector of coefficients at the GCV minimizing value of lambda (\code{bhat}) and the best value of lambda (\code{lamStar}).

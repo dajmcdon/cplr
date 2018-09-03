@@ -10,8 +10,7 @@
 #' @name cplr
 NULL
 
-#' @useDynLib cplr
-#' @importFrom Rcpp sourceCpp
 #' @import stats
+#' @importFrom Matrix rsparsematrix
 #' @importFrom  graphics matplot
 NULL

@@ -10,7 +10,7 @@
 #' @export
 #'
 #' @examples
-#' generateX(100, diag(1,10), 'rsparseBern')
+#' generateX(100, diag(1,10), 'rnorm')
 generateX <- function(n, covMatSqrt, rand='rnorm', m = NULL,...){
   rand = get(rand)
   X = matrix( rand(n * ncol(covMatSqrt),...), nrow=n) %*% covMatSqrt
@@ -85,7 +85,7 @@ generateb <- function(p, method = 'randN', b1 = NULL, s = 10, spar = 10,...) {
 #' @export
 #'
 #' @examples
-#' X = generateX(100, diag(1,10), 'rsparseBern')
+#' X = generateX(100, diag(1,10), 'rnorm')
 #' b = generateb(10, 'constNorm')
 #' Y = generateY(X, b, 'rnorm', sd=.1)
 generateY <- function(X, b, rand, ...){

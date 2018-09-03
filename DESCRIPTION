@@ -1,8 +1,8 @@
 Package: cplr
 Type: Package
 Title: Compressed and penalized linear regression
-Version: 0.1.3
-Date: 2016-10-30
+Version: 0.2.0
+Date: 2018-09-1
 Depends: R (>= 3.1.0)
 Authors@R: as.person(c(
   'Daniel J. McDonald <dajmcdon@indiana.edu> [aut,cre]',
@@ -19,8 +19,8 @@ License: GPL
 LazyData: TRUE
 RoxygenNote: 6.0.1
 Suggests: mseq,
-    BatchExperiments
+    batchtools
+Imports: Matrix
 URL: http://github.com/dajmcdon/cplr
 BugReports: http://github.com/dajmcdon/cplr/issues
-LinkingTo: Rcpp
-Imports: Rcpp
+

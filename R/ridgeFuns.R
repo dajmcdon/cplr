@@ -128,7 +128,7 @@ compressedRidge <- function(X, Y,
   n = length(Y)
   scaled = pls_scale(X, Y, n, p) # scale before compression
   if(type != 'xy'){
-    comp = compressCpp(scaled$Xs, q, scaled$ys, s)
+    comp = compressR(scaled$Xs, q, scaled$ys, s)
     S = svd(comp$QX)
   }
   switch(type,
@@ -231,3 +231,13 @@ compress_Comb <- function(S, scaled, comp, lam, lam.max, lam.min, nlam,
   return(out)
 }
 
+
+compressR <- function(X, q, y, s) {
+  n = nrow(X)
+  rescale = sqrt(q/s)
+  Q = Matrix::rsparsematrix(q, n, 1/s, rand.x = function(n) round(runif(n))*2-1)
+  QX = as.matrix(Q %*% X) / rescale
+  QY = as.vector(Q %*% y) / rescale
+  return(list(QX=QX,QY=QY))
+
+}

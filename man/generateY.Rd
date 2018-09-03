@@ -22,7 +22,7 @@ Returns a vector of length \code{nrow(X)}.
 Generates the response variable
 }
 \examples{
-X = generateX(100, diag(1,10), 'rsparseBern')
+X = generateX(100, diag(1,10), 'rnorm')
 b = generateb(10, 'constNorm')
 Y = generateY(X, b, 'rnorm', sd=.1)
 }
