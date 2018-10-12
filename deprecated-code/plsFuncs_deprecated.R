@@ -312,3 +312,41 @@ solve_robust <- function(A, b, tol=1e-10){
   if(detAA > tol) return(solve(AA, crossprod(A,b)))
   else return(c(.5,.5))
 }
+
+
+old_compressedRidge <- function(X, Y,
+                                compression = c('xy','qxqy','qxy','linComb','convexComb'),
+                                q, lam=NULL, lam.max = NULL, lam.min=1e-6, nlam=100, s=3,
+                                tol.lam0=1e-8, tol.lc=1e-10){
+  type = match.arg(compression)
+  p = ncol(X)
+  n = length(Y)
+  scaled = pls_scale(X, Y, n, p) # scale before compression
+  if(type != 'xy'){
+    comp = compressR(scaled$Xs, q, scaled$ys, s)
+    S = svd(comp$QX)
+  }
+  switch(type,
+         xy = {
+           S = svd(scaled$Xs)
+           return(ridge_svd(S, scaled, type='xy', NULL, lam, lam.max,
+                            lam.min, nlam, tol.lam0))
+         },
+         qxqy = {
+           return(ridge_svd(S, scaled, type='qxqy',comp, lam, lam.max,
+                            lam.min, nlam, tol.lam0))
+         },
+         qxy = {
+           return(ridge_svd(S, scaled, type='qxy',comp, lam, lam.max,
+                            lam.min, nlam, tol.lam0))
+         },
+         linComb = {
+           return(compress_Comb(S, scaled, comp, lam, lam.max, lam.min,
+                                nlam, ahat_linComb,tol.lam0, tol.lc))
+         },
+         convexComb = {
+           return(compress_Comb(S, scaled, comp, lam, lam.max, lam.min,
+                                nlam, ahat_convexComb,tol.lam0, tol.lc))
+         }
+  )
+}

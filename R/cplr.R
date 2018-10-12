@@ -14,3 +14,7 @@ NULL
 #' @importFrom Matrix rsparsematrix
 #' @importFrom  graphics matplot
 NULL
+
+#' @useDynLib cplr
+#' @importFrom Rcpp sourceCpp
+NULL
