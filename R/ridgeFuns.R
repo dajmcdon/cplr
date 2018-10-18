@@ -131,6 +131,8 @@ compressedRidge <- function(X, Y,
     comp$QX = scaled$Xs
     comp$QY = scaled$ys
   } else {comp = compressR(scaled$Xs, q, scaled$ys, s)}
+  garbage = gc()
+  ptm = proc.time()
   S = svd(comp$QX)
   if(type %in% c('xy','qxqy','qxy')){
     out = ridge_svd(S, scaled, type=type, comp, lam, lam.max,
@@ -147,6 +149,8 @@ compressedRidge <- function(X, Y,
          }
            )
   }
+  ptm = proc.time()-ptm
+  out$timing = ptm
   out
 }
 
@@ -228,11 +232,11 @@ compress_Comb <- function(S, scaled, comp, lam, lam.max, lam.min, nlam,
   return(out)
 }
 
-
+#' @export
 compressR <- function(X, q, y, s) {
   n = nrow(X)
   rescale = sqrt(q/s)
-  Q = Matrix::rsparsematrix(q, n, 1/s, rand.x = function(n) r_sign(n))
+  Q = Matrix::rsparsematrix(q, n, 1/s, rand.x = r_sign)
   QX = as.matrix(Q %*% X) / rescale
   QY = as.vector(Q %*% y) / rescale
   return(list(QX=QX,QY=QY))

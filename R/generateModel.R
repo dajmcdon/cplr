@@ -63,7 +63,7 @@ generateb <- function(p, method = 'randN', b1 = NULL, s = 10, spar = 10,...) {
   b = switch(method,
              expdecay = b1^(1:p),
              lindecay = p:1 / p,
-             sparse =c(rlaplace(s), rep_len(0, p-s)),
+             sparse = Matrix::rsparsematrix(1,p,nnz=s,rand.x = rnorm)/sqrt(s),
              randU = runif(p,...),
              randN = rnorm(p,...),
              constNorm = rep_len(1 / sqrt(p), p) * spar,
@@ -121,7 +121,7 @@ generateCov <- function(p, type=c('diag','corrUniform','corrDecay'), rho=.8){
                   corrDecay = toeplitz(c(1, rho^(1:(p-1)))),
                   stop('Invalid covariance type')
   )
-  ev = eigen(covMat)
+  ev = eigen(covMat, symmetric = TRUE)
   covMatSqrt = t(ev$vectors %*% (t(ev$vectors) * sqrt(ev$values)))
   return(covMatSqrt)
 }
