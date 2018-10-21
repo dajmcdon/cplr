@@ -207,9 +207,9 @@ compress_Comb <- function(S, scaled, comp, lam, lam.max, lam.min, nlam,
                           ahatfun, tol.lam0, tol.lc){
   n = length(scaled$ys)
   qxy = ridge_svd(S, scaled, 'qxy', comp, lam, lam.max, lam.min,
-                  nlam, tol.lam0, divstuff=(nlam>1))
+                  nlam, tol.lam0, divstuff=(length(lam)>1))
   if(is.null(lam)) lam=qxy$lam
-  qxqy = ridge_svd(S, scaled, 'qxqy', comp, lam, divstuff=(nlam>1))
+  qxqy = ridge_svd(S, scaled, 'qxqy', comp, lam, divstuff=(length(lam)>1))
   ahat = ahatfun(scaled$Xs, qxy, qxqy, scaled$ys, length(lam), tol.lc)
   bhatsc = qxy$bhatsc * ahat$aqxy + qxqy$bhatsc * ahat$aqxqy
   bhat = bhatsc/scaled$Xscale
@@ -217,7 +217,7 @@ compress_Comb <- function(S, scaled, comp, lam, lam.max, lam.min, nlam,
   df = pmin(drop(qxy$df * ahat$aqxy[1,] + qxqy$df * ahat$aqxqy[1,]),n)
   fitted = scaled$Xs %*% bhatsc
   div = NULL
-  if(nlam>1){
+  if(length(lam)>1){
     if(is.null(ahat$yh)){
       div = divergence_CC(ahat, fitted, df, qxy$divstuff, qxqy$divstuff, tol.lc)
     }else{
