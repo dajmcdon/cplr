@@ -63,7 +63,7 @@ generateb <- function(p, method = 'randN', b1 = NULL, s = 10, spar = 10,...) {
   b = switch(method,
              expdecay = b1^(1:p),
              lindecay = p:1 / p,
-             sparse = Matrix::rsparsematrix(1,p,nnz=s,rand.x = rnorm)/sqrt(s),
+             sparse = Matrix::rsparsematrix(p,1,nnz=s,rand.x = rnorm)/sqrt(s),
              randU = runif(p,...),
              randN = rnorm(p,...),
              constNorm = rep_len(1 / sqrt(p), p) * spar,
