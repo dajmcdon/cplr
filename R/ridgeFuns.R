@@ -128,9 +128,10 @@ compressedRidge <- function(X, Y,
   n = length(Y)
   scaled = pls_scale(X, Y, n, p) # scale before compression
   if(type == 'xy' || q==n){
-    comp$QX = scaled$Xs
-    comp$QY = scaled$ys
-  } else {comp = compressR(scaled$Xs, q, scaled$ys, s)}
+    comp = list(QX = scaled$Xscale, QY = scaled$ys)
+  } else {
+    comp = compressR(scaled$Xs, q, scaled$ys, s)
+  }
   garbage = gc()
   ptm = proc.time()
   S = svd(comp$QX)
