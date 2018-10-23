@@ -128,7 +128,7 @@ compressedRidge <- function(X, Y,
   n = length(Y)
   scaled = pls_scale(X, Y, n, p) # scale before compression
   if(type == 'xy' || q==n){
-    comp = list(QX = scaled$Xscale, QY = scaled$ys)
+    comp = list(QX = scaled$Xs, QY = scaled$ys)
   } else {
     comp = compressR(scaled$Xs, q, scaled$ys, s)
   }
