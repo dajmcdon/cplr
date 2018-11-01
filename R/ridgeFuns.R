@@ -140,15 +140,11 @@ compressedRidge <- function(X, Y,
                      lam.min, nlam, tol.lam0)
   } else {
     out = switch(type,
-         linComb = {
-           return(compress_Comb(S, scaled, comp, lam, lam.max, lam.min,
-                                nlam, ahat_linComb,tol.lam0, tol.lc))
-         },
-         convexComb = {
-           return(compress_Comb(S, scaled, comp, lam, lam.max, lam.min,
-                                nlam, ahat_convexComb,tol.lam0, tol.lc))
-         }
-           )
+         linComb = compress_Comb(S, scaled, comp, lam, lam.max, lam.min,
+                                nlam, ahat_linComb,tol.lam0, tol.lc),
+         convexComb = compress_Comb(S, scaled, comp, lam, lam.max, lam.min,
+                                nlam, ahat_convexComb,tol.lam0, tol.lc)
+         )
   }
   ptm = proc.time()-ptm
   out$timing = ptm
