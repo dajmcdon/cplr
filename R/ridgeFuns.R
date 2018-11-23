@@ -122,7 +122,8 @@ ridge_svd <- function(S, scaled,
 compressedRidge <- function(X, Y,
                             compression = c('xy','qxqy','qxy','linComb','convexComb'),
                             q, lam=NULL, lam.max = NULL, lam.min=1e-6, nlam=100, s=3,
-                            tol.lam0=1e-8, tol.lc=1e-10){
+                            tol.lam0=1e-8, tol.lc=1e-10,
+                            div_calc_yn = TRUE){
   type = match.arg(compression)
   p = ncol(X)
   n = length(Y)
@@ -141,9 +142,11 @@ compressedRidge <- function(X, Y,
   } else {
     out = switch(type,
          linComb = compress_Comb(S, scaled, comp, lam, lam.max, lam.min,
-                                nlam, ahat_linComb,tol.lam0, tol.lc),
+                                nlam, ahat_linComb,tol.lam0, tol.lc,
+                                div_calc_yn),
          convexComb = compress_Comb(S, scaled, comp, lam, lam.max, lam.min,
-                                nlam, ahat_convexComb,tol.lam0, tol.lc)
+                                nlam, ahat_convexComb,tol.lam0, tol.lc,
+                                div_calc_yn)
          )
   }
   ptm = proc.time()-ptm
@@ -201,7 +204,7 @@ ahat_convexComb <- function(Xs, qxy, qxqy, Ys, nlam, tol){
 }
 
 compress_Comb <- function(S, scaled, comp, lam, lam.max, lam.min, nlam,
-                          ahatfun, tol.lam0, tol.lc){
+                          ahatfun, tol.lam0, tol.lc, div_calc_yn){
   n = length(scaled$ys)
   qxy = ridge_svd(S, scaled, 'qxy', comp, lam, lam.max, lam.min,
                   nlam, tol.lam0, divstuff=(length(lam)>1))
@@ -214,7 +217,7 @@ compress_Comb <- function(S, scaled, comp, lam, lam.max, lam.min, nlam,
   df = pmin(drop(qxy$df * ahat$aqxy[1,] + qxqy$df * ahat$aqxqy[1,]),n)
   fitted = scaled$Xs %*% bhatsc
   div = NULL
-  if(length(lam)>1){
+  if(length(lam)>1 & div_calc_yn){
     if(is.null(ahat$yh)){
       div = divergence_CC(ahat, fitted, df, qxy$divstuff, qxqy$divstuff, tol.lc)
     }else{
