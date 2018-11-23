@@ -45,8 +45,9 @@ divergence_CC <- function(ahat, fitted, df, qxy, qxqy, tol){
   easy = (ahat_f < tol) | (ahat_p < tol)
       # for which lambdas
   if(all(easy)) return(df)
-  yh = rbind(qxy$fitted, qxqy$fitted)
-  dim(yh) = c(nrow(qxy$fitted), 2, ncol(qxy$fitted))
+  yh1 = qxy$fitted
+  yh2 = qxqy$fitted
+  #dim(yh) = c(nrow(qxy$fitted), 2, ncol(qxy$fitted))
   hard = (1:length(df))[!easy]
 
   # Precomputations
@@ -66,8 +67,8 @@ divergence_CC <- function(ahat, fitted, df, qxy, qxqy, tol){
   YfHpYf = colSums(RXXRdivLSQY^2 / div) # YQSLdivRXXRdivRXXRdivLSQY
   Term1 = YHpYp - YHpYf - YfHpYp + YfHpYf
   # Term 2
-  YpYp = colSums(yh[,1,]^2)
-  YfYp = colSums(yh[,1,]*yh[,2,])
+  YpYp = colSums(yh1^2)
+  YfYp = colSums(yh1*yh2)
   YpHfYp = colSums(RXXRdivRXY * divL2divRXY) # YXRdivRXXRdivL2divRXY
   YpHfYf = colSums(RXXRdivRXY * divL2divLSQY) # YXRdivRXXRdivL2divLSQY
   Term2 = YpYp - YfYp - YpHfYp + YpHfYf
@@ -76,8 +77,8 @@ divergence_CC <- function(ahat, fitted, df, qxy, qxqy, tol){
   YpHpYp = colSums(RXXRdivRXY^2 / div) # YXRdivRXXRdivRXXRdivRXY
   Term3 = YpHpYp - 2*YfHpYp - YpHfYp + 2*YpHfYf +YfHpYf - YfHfYf
   # Multipliers
-  YpmYf = yh[,1,] - yh[,2,]
-  YmYf = qxy$Ys - yh[,2,]
+  YpmYf = yh1 - yh2
+  YmYf = qxy$Ys - yh2
   d1 = colSums(YpmYf^2)
   d2 = d1^2
   num = 2*colSums(YmYf * YpmYf)
