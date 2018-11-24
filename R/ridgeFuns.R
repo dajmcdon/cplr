@@ -207,9 +207,9 @@ compress_Comb <- function(S, scaled, comp, lam, lam.max, lam.min, nlam,
                           ahatfun, tol.lam0, tol.lc, div_calc_yn){
   n = length(scaled$ys)
   qxy = ridge_svd(S, scaled, 'qxy', comp, lam, lam.max, lam.min,
-                  nlam, tol.lam0, divstuff=(length(lam)>1))
+                  nlam, tol.lam0, divstuff=div_calc_yn)
   if(is.null(lam)) lam=qxy$lam
-  qxqy = ridge_svd(S, scaled, 'qxqy', comp, lam, divstuff=(length(lam)>1))
+  qxqy = ridge_svd(S, scaled, 'qxqy', comp, lam, divstuff=div_calc_yn)
   ahat = ahatfun(scaled$Xs, qxy, qxqy, scaled$ys, length(lam), tol.lc)
   bhatsc = qxy$bhatsc * ahat$aqxy + qxqy$bhatsc * ahat$aqxqy
   bhat = bhatsc/scaled$Xscale
