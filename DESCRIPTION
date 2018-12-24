@@ -17,12 +17,13 @@ Description: This package implements the simulations and data analysis examples
     result is improved computation and better statistical accuracy.
 License: GPL
 LazyData: TRUE
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Suggests: mseq,
     batchtools
 Imports: Matrix,
-    Rcpp
+    Rcpp,
+    RcppArmadillo
 Encoding: UTF-8
 URL: http://github.com/dajmcdon/cplr
 BugReports: http://github.com/dajmcdon/cplr/issues
-LinkingTo: Rcpp
+LinkingTo: Rcpp, RcppArmadillo

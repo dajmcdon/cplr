@@ -6,7 +6,8 @@
 \usage{
 compressedRidge(X, Y, compression = c("xy", "qxqy", "qxy", "linComb",
   "convexComb"), q, lam = NULL, lam.max = NULL, lam.min = 1e-06,
-  nlam = 100, s = 3, tol.lam0 = 1e-08, tol.lc = 1e-10)
+  nlam = 100, s = 3, tol.lam0 = 1e-08, tol.lc = 1e-10,
+  div_calc_yn = TRUE)
 }
 \arguments{
 \item{X}{the design matrix \code{(n x p)}}

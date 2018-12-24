@@ -11,6 +11,7 @@
 NULL
 
 #' @import stats
+#' @import RcppArmadillo
 #' @importFrom Matrix rsparsematrix
 #' @importFrom  graphics matplot
 NULL

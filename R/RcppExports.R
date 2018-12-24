@@ -5,3 +5,8 @@ r_sign <- function(n) {
     .Call('_cplr_r_sign', PACKAGE = 'cplr', n)
 }
 
+#' @export
+getDesign <- function(arr, mask, rad) {
+    .Call('_cplr_getDesign', PACKAGE = 'cplr', arr, mask, rad)
+}
+
