@@ -238,9 +238,16 @@ compress_Comb <- function(S, scaled, comp, lam, lam.max, lam.min, nlam,
 #' @export
 compressR <- function(X, q, y, s) {
   n = nrow(X)
-  rescale = sqrt(q/s)
-  Q = Matrix::rsparsematrix(q, n, 1/s, rand.x = r_sign)
-  QX = as.matrix(Q %*% X) / rescale
-  QY = as.vector(Q %*% y) / rescale
-  return(list(QX=QX,QY=QY))
+  if(n * q > 2^30) {
+    # Q is too large to allocate on most machines, need to do it rowwise.
+    out = compressCpp(X, q, y, s)
+  } else {
+    rescale = sqrt(q/s)
+    Q = Matrix::rsparsematrix(q, n, 1/s, rand.x = r_sign) / rescale
+    out = list(
+      QX = as.matrix(Q %*% X),
+      QY = as.vector(Q %*% y)
+    )
+  }
+  return(out)
 }

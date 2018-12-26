@@ -15,7 +15,6 @@ double rng_unif() {
   return u;
 }
 
-// [[Rcpp::export]]
 NumericVector r_sign(const int& n) {
   NumericVector x(n);
   
@@ -24,6 +23,39 @@ NumericVector r_sign(const int& n) {
     x[i] = (u > 0.5) ? 1.0 : -1.0;
   }
   return x;
+}
+
+void r_sbern(arma::rowvec &Q, double s, double rs){
+  double p = 1.0 / s;
+  double q = 1.0 - p;
+  
+  arma::rowvec::iterator it = Q.begin();
+  arma::rowvec::iterator it_end = Q.end();
+  
+  for(; it < it_end; it++){
+    double u = rng_unif();
+    if(u < p) (*it) += rs;
+    if(u > q) (*it) -= rs;
+  }
+}
+
+
+List compressCpp(arma::mat const & X, int q, arma::colvec const & y, double s){
+  int p = X.n_cols;
+  int n = X.n_rows;
+  
+  arma::mat QX(q, p, arma::fill::zeros);
+  arma::vec QY(q, arma::fill::zeros);
+  
+  double rescale = sqrt(s/(1.0*q));
+  
+  for(int i=0; i<q; i++){
+    arma::rowvec Q(n, arma::fill::zeros);
+    r_sbern(Q, s, rescale);
+    QX.row(i) += Q * X;
+    QY(i) += arma::as_scalar(Q * y);
+  }
+  return List::create(Named("QX") = QX, Named("QY") = QY);
 }
 
 
