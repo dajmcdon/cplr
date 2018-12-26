@@ -6,6 +6,20 @@
 
 using namespace Rcpp;
 
+// compressCpp
+List compressCpp(arma::mat const& X, int q, arma::colvec const& y, double s);
+RcppExport SEXP _cplr_compressCpp(SEXP XSEXP, SEXP qSEXP, SEXP ySEXP, SEXP sSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat const& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type q(qSEXP);
+    Rcpp::traits::input_parameter< arma::colvec const& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    rcpp_result_gen = Rcpp::wrap(compressCpp(X, q, y, s));
+    return rcpp_result_gen;
+END_RCPP
+}
 // getDesign
 arma::mat getDesign(arma::cube const& arr, arma::umat mask, int rad);
 RcppExport SEXP _cplr_getDesign(SEXP arrSEXP, SEXP maskSEXP, SEXP radSEXP) {
@@ -21,6 +35,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_cplr_compressCpp", (DL_FUNC) &_cplr_compressCpp, 4},
     {"_cplr_getDesign", (DL_FUNC) &_cplr_getDesign, 3},
     {NULL, NULL, 0}
 };

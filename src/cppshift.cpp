@@ -39,7 +39,7 @@ void r_sbern(arma::rowvec &Q, double s, double rs){
   }
 }
 
-
+// [[Rcpp::export]]
 List compressCpp(arma::mat const & X, int q, arma::colvec const & y, double s){
   int p = X.n_cols;
   int n = X.n_rows;
