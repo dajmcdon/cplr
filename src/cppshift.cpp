@@ -15,6 +15,7 @@ double rng_unif() {
   return u;
 }
 
+// [[Rcpp::export]]
 NumericVector r_sign(const int& n) {
   NumericVector x(n);
   

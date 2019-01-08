@@ -6,6 +6,17 @@
 
 using namespace Rcpp;
 
+// r_sign
+NumericVector r_sign(const int& n);
+RcppExport SEXP _cplr_r_sign(SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const int& >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(r_sign(n));
+    return rcpp_result_gen;
+END_RCPP
+}
 // compressCpp
 List compressCpp(arma::mat const& X, int q, arma::colvec const& y, double s);
 RcppExport SEXP _cplr_compressCpp(SEXP XSEXP, SEXP qSEXP, SEXP ySEXP, SEXP sSEXP) {
@@ -35,6 +46,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_cplr_r_sign", (DL_FUNC) &_cplr_r_sign, 1},
     {"_cplr_compressCpp", (DL_FUNC) &_cplr_compressCpp, 4},
     {"_cplr_getDesign", (DL_FUNC) &_cplr_getDesign, 3},
     {NULL, NULL, 0}
