@@ -40,24 +40,7 @@ ridgeRegression <- function(X, Y, lam.upper = min(dim(X))){
   return(list(bhat=bhat, lamStar = lamStar))
 }
 
-#' No intercept ridge regression
-#'
-#' Computes the ridge regression estimate for a fixed value of lambda.
-#'
-#' @param X design matrix
-#' @param Y response vector
-#' @param lam a value of the penalty parameter
-#'
-#' @return A vector of coefficients
-ridgeRegressionLam <- function(X, Y, lam){
-  n = dim(X)[1]
-  p = dim(X)[2]
-  XX = crossprod(X) / n
-  XY = crossprod(X, Y) / n
 
-  bhat = solve(XX + lam*diag(p), XY)
-  return(bhat)
-}
 
 #' The generalized cross validation (GCV) score for ridge regression
 #'

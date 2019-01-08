@@ -235,7 +235,7 @@ compress_Comb <- function(S, scaled, comp, lam, lam.max, lam.min, nlam,
   return(out)
 }
 
-#' @export
+
 compressR <- function(X, q, y, s) {
   n = nrow(X)
   if(n * q > 2^30) {
